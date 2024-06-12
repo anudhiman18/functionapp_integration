@@ -39,7 +39,7 @@ steps:
 
     - name: Publish the Function App
       run: |
-        az functionapp deployment config-file --resource-group <RESOURCE_GROUP_NAME> --name <FUNCTION_APP_NAME> --src-path pathof the config_file
+        az functionapp deployment config-file --resource-group <RESOURCE_GROUP_NAME> --name <FUNCTION_APP_NAME> -- pathof the config_file
 
 
 
