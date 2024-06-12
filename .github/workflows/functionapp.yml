@@ -1,0 +1,46 @@
+name: Deploy Azure Function App with New Relic Agent
+on:
+   workflow_dispatch:
+    inputs:
+      function_app_name:
+        description: function app name
+        required: true
+
+      rg_name:
+        description: resource group name
+        required: true
+      jobs:
+deploy:
+    runs-on: ubuntu-latest
+steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        secrets: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Select the Function App
+      run: |
+        az functionapp config appsettings set --name ${{ inputs.function_app_name }} --resource-group ${{ inputs.rg_name }} --settings FUNCTIONS_EXTENSION_VERSION=~3
+    
+    - name: Install New Relic agent
+      run: |
+        pip install newrelic
+    - name: Copy newrelic.config path
+      id: copy-path
+      run: |
+        cp newrelic.ini /home/runner/work/_temp/newrelic.config
+        echo "NEW_RELIC_CONFIG_PATH=/home/runner/work/_temp/newrelic.config" >> $GITHUB_EN
+
+    - name: Edit newrelic.configfile
+      run: |
+        CONFIG_PATH="${{ env.NEW_RELIC_CONFIG_PATH }}"
+        sed -i 's|</log>|<log directory="path/NewRelic" level="info"></log>|' "$CONFIG_PATH"
+
+    - name: Publish the Function App
+      run: |
+        az functionapp deployment config-file --resource-group <RESOURCE_GROUP_NAME> --name <FUNCTION_APP_NAME> --src-path pathof the config_file
+
+
+
+
